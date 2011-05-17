@@ -1,0 +1,209 @@
+<!doctype html>
+<title>Color Clock CSS</title>
+<link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<style>
+  a{
+    color: #eee;
+    font-weight: bold;
+  }
+	body{
+	  font-family: Helvetica, Arial, sans-serif;
+	  font-size: 12px;
+	  margin: 0;
+	  padding: 0;
+	  background-color: #fff;
+	  color: #fff;
+    -webkit-transition: background-color 1s linear;
+    -moz-transition: background-color 1s linear;
+    transition: backgroun-color 1s linear;
+	}
+	body:before{
+	  position: absolute;
+	  content: '';
+	  background-image: -webkit-gradient(radial, 50% 50%, 150, 50% 50%, 800, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.2)));
+    background-image: -moz-radial-gradient(center center, circle cover, rgba(0,0,0,0) 20%, rgba(0,0,0,0.2) 80%);
+    position: absolute;
+	  left: 0;
+	  bottom: 0;
+	  right: 0;
+	  top: 0;
+	}
+	body:after{
+	  position: absolute;
+	  content: '';
+    left: 10px;
+    bottom: 10px;
+    right: 10px;
+    top: 10px;
+    border: 1px solid rgba(255,255,255,0.3);
+	}
+	#about{
+	  z-index: 99;
+	  background: rgba(0,0,0,0.2);
+	  border-radius: 5px;
+	  padding: 10px;
+	  position: absolute;
+	  width: 350px;
+	  right: 20px;
+	  top: 20px;	  
+	}
+	#about p{
+	  line-height: 18px;
+    margin: 0;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+  }
+	#container{
+	  z-index: 98;
+    font-family: 'Inconsolata', monospace;
+	  width: 540px;
+	  height: 160px;
+	  position: absolute;
+	  left: 50%;
+	  top: 50%;
+	  margin-left: -270px;
+	  margin-top: -80px;
+	}
+	#container a{
+	  float: left;
+    height: 15px;
+    margin: 10px 10px 0 0;
+    width: 265px;
+    background: #fff;
+    overflow: hidden;
+    text-indent: -1000px;
+    -webkit-transition: opacity 0.5s linear;
+    -moz-transition: opacity 0.5s linear;
+    transition: opacity 0.5s linear;
+  }
+	#container a:last-child{
+	  margin-right: 0;
+  }
+	#container #show_hex{
+    opacity: 0.5;
+  }
+	#container:target #time{
+	  margin-top: -130px;
+  }
+	#container:target #show_hex{
+    opacity: 1;
+  }
+  #container:target #show_time{
+    opacity: 0.5;
+  }
+	#info{
+    opacity: 0.7;
+	  height: 140px;
+	  overflow: hidden;
+	  text-align: center;
+	  font-size: 120px;
+	}
+	#hex{
+	  text-transform: uppercase;	  
+	}
+	#time{
+	  border-bottom: 5px solid #fff;	  
+    -webkit-transition: all 0.5s linear;
+    -moz-transition: all 0.5s linear;
+    transition: all 0.5s linear;
+	}
+</style>
+<body>
+  
+	<div id="container">
+    <div id="info">
+      <div id="time">
+        <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+      </div>
+      <div id="hex">000000</div>
+    </div>
+    <a href="#" id="show_time">Time</a>
+    <a href="#container" id="show_hex">Hex</a>
+	</div>
+	
+  <div id="about">
+    <p>
+      This is a CSS implementation of <a href="http://thecolourclock.co.uk">thecolourclock.co.uk</a>, it was inspired by a <a href="http://twitter.com/dalmaer/status/41036331727454208">tweet</a> by <a href="http://twitter.com/dalmaer/">@dalmaer</a>. All credits go to the original creator, this is just a quick demo in CSS. <br /><br />
+      Implementation by <a href="http://mario.ec">Mario Estrada</a>.
+    </p>
+  </div>
+
+<script>
+  var hours = $('#hours');
+  var seconds = $('#seconds');
+  var minutes = $('#minutes');
+  var hex = $('#hex');
+  var body = $('body');
+  
+  setInterval(function()
+  {
+    var d = new Date();
+    hours.text(d.getHours() < 10 ? '0' + d.getHours() : d.getHours());
+    minutes.text(d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes());
+    seconds.text(d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds());
+    
+    var bg = getHex(d);
+    body.css('background-color', '#' + bg);
+    hex.text(bg);
+  }, 1000);
+  
+  getHex = function(d)
+  {
+    var milliseconds = d.getMilliseconds();
+    var seconds = d.getSeconds();
+    var minutes = d.getMinutes();
+    var hours = d.getHours();
+    var array = new Array();
+    var calc = (hours + minutes / 60) / 24;
+    array[0] = convertBase16(Math.round(calc * 15));
+    var calc2 = NaN;
+    if (hours >= 20){
+      calc2 = (hours + minutes / 60) / 4;
+    }
+    else{
+      calc2 = (hours + minutes / 60) / 10;
+    }
+    var calc3 = Math.floor(calc2);
+    array[1] = convertBase16(Math.round((calc2 - calc3) * 15));
+    var calc4 = (minutes + seconds / 60) / 60;
+    array[2] = convertBase16(Math.round(calc4 * 15));
+    var calc5 = (minutes + seconds / 60) / 10;
+    var calc6 = Math.floor(calc5);
+    array[3] = convertBase16(Math.round((calc5 - calc6) * 15));
+    var calc7 = (seconds + milliseconds / 1000) / 60;
+    array[4] = convertBase16(Math.round(calc7 * 15));
+    var calc8 = (seconds + milliseconds / 1000) / 10;
+    var calc9 = Math.floor(calc8);
+    array[5] = convertBase16(Math.round((calc8 - calc9) * 15));
+        
+    return array.join("");
+  }
+  
+  function convertBase16(num){
+    return (num < 10 ? num : num.toString(16));
+  }
+</script>
+
+<!-- !Google Tracking -->
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-1804175-7']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+var ga = document.createElement('script');
+ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 
+    'http://www') + '.google-analytics.com/ga.js';
+ga.setAttribute('async', 'true');
+document.documentElement.firstChild.appendChild(ga);
+})();
+</script>
+
+<!-- !Reinvigorate Tracking -->
+<script type="text/javascript" src="http://include.reinvigorate.net/re_.js"></script>
+<script type="text/javascript">
+try {
+reinvigorate.track("qi88f-u76940ookm");
+} catch(err) {}
+</script>
+</body>
